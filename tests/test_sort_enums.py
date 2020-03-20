@@ -4,9 +4,9 @@ import sqlalchemy as sa
 from graphene import Argument, Enum, List, ObjectType, Schema
 from graphene.relay import Node
 
-from ..fields import SQLAlchemyConnectionField
-from ..types import SQLAlchemyObjectType
-from ..utils import to_type_name
+from graphene_sqlalchemy.fields import SQLAlchemyConnectionField
+from graphene_sqlalchemy.types import SQLAlchemyObjectType
+from graphene_sqlalchemy.utils import to_type_name
 from .models import Base, HairKind, Pet
 from .test_query import to_std_dicts
 

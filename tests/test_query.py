@@ -1,9 +1,9 @@
 import graphene
 from graphene.relay import Node
 
-from ..converter import convert_sqlalchemy_composite
-from ..fields import SQLAlchemyConnectionField
-from ..types import ORMField, SQLAlchemyObjectType
+from graphene_sqlalchemy.converter import convert_sqlalchemy_composite
+from graphene_sqlalchemy.fields import SQLAlchemyConnectionField
+from graphene_sqlalchemy.types import ORMField, SQLAlchemyObjectType
 from .models import Article, CompositeFullName, Editor, HairKind, Pet, Reporter
 from .utils import to_std_dicts
 

@@ -4,9 +4,9 @@ from promise import Promise
 from graphene import ObjectType
 from graphene.relay import Connection, Node
 
-from ..fields import (SQLAlchemyConnectionField,
-                      UnsortedSQLAlchemyConnectionField)
-from ..types import SQLAlchemyObjectType
+from graphene_sqlalchemy.fields import (SQLAlchemyConnectionField,
+                                        UnsortedSQLAlchemyConnectionField)
+from graphene_sqlalchemy.types import SQLAlchemyObjectType
 from .models import Editor as EditorModel
 from .models import Pet as PetModel
 

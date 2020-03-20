@@ -1,6 +1,6 @@
 import graphene
 
-from ..types import SQLAlchemyObjectType
+from graphene_sqlalchemy.types import SQLAlchemyObjectType
 from .models import HairKind, Pet, Reporter
 from .test_query import add_test_data, to_std_dicts
 

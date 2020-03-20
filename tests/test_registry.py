@@ -3,9 +3,9 @@ from sqlalchemy.types import Enum as SQLAlchemyEnum
 
 from graphene import Enum as GrapheneEnum
 
-from ..registry import Registry
-from ..types import SQLAlchemyObjectType
-from ..utils import EnumValue
+from graphene_sqlalchemy.registry import Registry
+from graphene_sqlalchemy.types import SQLAlchemyObjectType
+from graphene_sqlalchemy.utils import EnumValue
 from .models import Pet
 
 

@@ -4,8 +4,8 @@ from graphql.backend import GraphQLCachedBackend, GraphQLCoreBackend
 import graphene
 from graphene import relay
 
-from ..fields import BatchSQLAlchemyConnectionField
-from ..types import SQLAlchemyObjectType
+from graphene_sqlalchemy.fields import BatchSQLAlchemyConnectionField
+from graphene_sqlalchemy.types import SQLAlchemyObjectType
 from .models import Article, HairKind, Pet, Reporter
 from .utils import is_sqlalchemy_version_less_than
 

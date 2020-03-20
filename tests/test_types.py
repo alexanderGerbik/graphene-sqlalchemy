@@ -1,17 +1,16 @@
 import mock
 import pytest
-import six  # noqa F401
 
 from graphene import (Dynamic, Field, GlobalID, Int, List, Node, NonNull,
                       ObjectType, Schema, String)
 from graphene.relay import Connection
 
-from ..converter import convert_sqlalchemy_composite
-from ..fields import (SQLAlchemyConnectionField,
-                      UnsortedSQLAlchemyConnectionField, createConnectionField,
-                      registerConnectionFieldFactory,
-                      unregisterConnectionFieldFactory)
-from ..types import ORMField, SQLAlchemyObjectType, SQLAlchemyObjectTypeOptions
+from graphene_sqlalchemy.converter import convert_sqlalchemy_composite
+from graphene_sqlalchemy.fields import (SQLAlchemyConnectionField,
+                                        UnsortedSQLAlchemyConnectionField, createConnectionField,
+                                        registerConnectionFieldFactory,
+                                        unregisterConnectionFieldFactory)
+from graphene_sqlalchemy.types import ORMField, SQLAlchemyObjectType, SQLAlchemyObjectTypeOptions
 from .models import Article, CompositeFullName, Pet, Reporter
 
 

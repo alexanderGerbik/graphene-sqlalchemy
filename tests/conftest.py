@@ -4,8 +4,8 @@ from sqlalchemy.orm import sessionmaker
 
 import graphene
 
-from ..converter import convert_sqlalchemy_composite
-from ..registry import reset_global_registry
+from graphene_sqlalchemy.converter import convert_sqlalchemy_composite
+from graphene_sqlalchemy.registry import reset_global_registry
 from .models import Base, CompositeFullName
 
 test_db_url = 'sqlite://'  # use in-memory database for tests
