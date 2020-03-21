@@ -3,7 +3,8 @@ from sqlalchemy.types import Enum as SQLAlchemyEnumType
 
 from graphene import Argument, Enum, List
 
-from .utils import EnumValue, to_enum_value_name, to_type_name
+from .utils import EnumValue
+from . import case
 
 
 def _convert_sa_to_graphene_enum(sa_enum, fallback_name=None):
@@ -23,22 +24,22 @@ def _convert_sa_to_graphene_enum(sa_enum, fallback_name=None):
         )
     enum_class = sa_enum.enum_class
     if enum_class:
-        if all(to_enum_value_name(key) == key for key in enum_class.__members__):
+        if all(case.to_upper_snake(key) == key for key in enum_class.__members__):
             return Enum.from_enum(enum_class)
         name = enum_class.__name__
         members = [
-            (to_enum_value_name(key), value.value)
+            (case.to_upper_snake(key), value.value)
             for key, value in enum_class.__members__.items()
         ]
     else:
         sql_enum_name = sa_enum.name
         if sql_enum_name:
-            name = to_type_name(sql_enum_name)
+            name = case.to_pascal(sql_enum_name)
         elif fallback_name:
             name = fallback_name
         else:
             raise TypeError("No type name specified for {!r}".format(sa_enum))
-        members = [(to_enum_value_name(key), key) for key in sa_enum.enums]
+        members = [(case.to_upper_snake(key), key) for key in sa_enum.enums]
     return Enum(name, members)
 
 
@@ -81,14 +82,14 @@ def enum_for_field(obj_type, field_name):
         )
     enum = registry.get_graphene_enum_for_sa_enum(sa_enum)
     if not enum:
-        fallback_name = obj_type._meta.name + to_type_name(field_name)
+        fallback_name = obj_type._meta.name + case.to_pascal(field_name)
         enum = _convert_sa_to_graphene_enum(sa_enum, fallback_name)
         registry.register_enum(sa_enum, enum)
     return enum
 
 
 def _default_sort_enum_symbol_name(column_name, sort_asc=True):
-    return to_enum_value_name(column_name) + ("_ASC" if sort_asc else "_DESC")
+    return case.to_upper_snake(column_name) + ("_ASC" if sort_asc else "_DESC")
 
 
 def sort_enum_for_object_type(

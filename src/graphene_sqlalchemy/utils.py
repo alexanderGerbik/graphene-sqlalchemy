@@ -1,4 +1,3 @@
-import re
 import warnings
 
 from sqlalchemy.exc import ArgumentError
@@ -39,22 +38,6 @@ def is_mapped_instance(cls):
         return False
     else:
         return True
-
-
-def to_type_name(name):
-    """Convert the given name to a GraphQL type name."""
-    return "".join(part[:1].upper() + part[1:] for part in name.split("_"))
-
-
-_re_enum_value_name_1 = re.compile("(.)([A-Z][a-z]+)")
-_re_enum_value_name_2 = re.compile("([a-z0-9])([A-Z])")
-
-
-def to_enum_value_name(name):
-    """Convert the given name to a GraphQL enum value name."""
-    return _re_enum_value_name_2.sub(
-        r"\1_\2", _re_enum_value_name_1.sub(r"\1_\2", name)
-    ).upper()
 
 
 class EnumValue(str):

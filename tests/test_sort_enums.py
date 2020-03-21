@@ -6,7 +6,7 @@ from graphene.relay import Node
 
 from graphene_sqlalchemy.fields import SQLAlchemyConnectionField
 from graphene_sqlalchemy.types import SQLAlchemyObjectType
-from graphene_sqlalchemy.utils import to_type_name
+from graphene_sqlalchemy import case
 from .models import Base, HairKind, Pet
 from .test_query import to_std_dicts
 
@@ -222,7 +222,7 @@ def test_sort_argument_with_custom_symbol_names():
             model = Pet
 
     def get_symbol_name(column_name, sort_asc=True):
-        return to_type_name(column_name) + ("Up" if sort_asc else "Down")
+        return case.to_pascal(column_name) + ("Up" if sort_asc else "Down")
 
     sort_arg = PetType.sort_argument(get_symbol_name=get_symbol_name)
     sort_enum = sort_arg.type._of_type
