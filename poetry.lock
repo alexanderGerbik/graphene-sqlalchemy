@@ -621,7 +621,7 @@ testing = ["jaraco.itertools", "func-timeout"]
 dev = ["coveralls", "mock", "pre-commit", "pytest", "pytest-benchmark", "pytest-cov", "sqlalchemy_utils", "tox"]
 
 [metadata]
-content-hash = "6bdadba887f40d29c93b9d8d00e1c3b7e1a257a1dfe438b6a5a0bb1a8ec74bec"
+content-hash = "6e7f8d2a2bf077951d32d8a1a0eacbbe907f8ec57b49465a7fda518dcae180d1"
 python-versions = "^3.6"
 
 [metadata.files]
