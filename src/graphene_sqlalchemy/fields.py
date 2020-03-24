@@ -1,4 +1,3 @@
-import warnings
 from functools import partial
 
 from promise import Promise, is_thenable
@@ -120,37 +119,4 @@ class BatchSQLAlchemyConnectionField(UnsortedSQLAlchemyConnectionField):
 def default_connection_field_factory(relationship, registry, **field_kwargs):
     model = relationship.mapper.entity
     model_type = registry.get_type_for_model(model)
-    return __connectionFactory(model_type, **field_kwargs)
-
-
-# TODO Remove in next major version
-__connectionFactory = UnsortedSQLAlchemyConnectionField
-
-
-def createConnectionField(_type, **field_kwargs):
-    warnings.warn(
-        'createConnectionField is deprecated and will be removed in the next '
-        'major version. Use SQLAlchemyObjectType.Meta.connection_field_factory instead.',
-        DeprecationWarning,
-    )
-    return __connectionFactory(_type, **field_kwargs)
-
-
-def registerConnectionFieldFactory(factoryMethod):
-    warnings.warn(
-        'registerConnectionFieldFactory is deprecated and will be removed in the next '
-        'major version. Use SQLAlchemyObjectType.Meta.connection_field_factory instead.',
-        DeprecationWarning,
-    )
-    global __connectionFactory
-    __connectionFactory = factoryMethod
-
-
-def unregisterConnectionFieldFactory():
-    warnings.warn(
-        'registerConnectionFieldFactory is deprecated and will be removed in the next '
-        'major version. Use SQLAlchemyObjectType.Meta.connection_field_factory instead.',
-        DeprecationWarning,
-    )
-    global __connectionFactory
-    __connectionFactory = UnsortedSQLAlchemyConnectionField
+    return UnsortedSQLAlchemyConnectionField(model_type, **field_kwargs)
