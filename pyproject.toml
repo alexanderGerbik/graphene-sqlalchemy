@@ -50,6 +50,9 @@ dev = [
     "tox",
 ]
 
+
+[tool.poetry.dev-dependencies]
+black = "^19.10b0"
 [tool.tox]
 legacy_tox_ini = """
 [tox]
