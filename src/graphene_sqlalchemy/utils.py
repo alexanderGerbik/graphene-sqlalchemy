@@ -4,6 +4,8 @@ from sqlalchemy.orm.exc import UnmappedClassError, UnmappedInstanceError
 
 
 def get_session(context):
+    if not isinstance(context, dict):
+        return None
     return context.get("session")
 
 

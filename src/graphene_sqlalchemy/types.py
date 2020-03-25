@@ -64,8 +64,6 @@ class ORMField(OrderedType):
             Default to the `doc` attribute of the SQLAlchemy column property.
         :param bool required:
             Default to the opposite of the `nullable` attribute of the SQLAlchemy column property.
-        :param str description:
-            Same behavior as in graphene.Field. Defaults to None.
         :param str deprecation_reason:
             Same behavior as in graphene.Field. Defaults to None.
         :param bool batching:
