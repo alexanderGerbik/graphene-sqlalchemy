@@ -1,10 +1,9 @@
 from collections import OrderedDict
+from typing import Container, Iterable
 
 import sqlalchemy
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import (ColumnProperty, CompositeProperty,
-                            RelationshipProperty)
-from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm import ColumnProperty, CompositeProperty, RelationshipProperty
 
 from graphene import Field
 from graphene.relay import Connection, Node
@@ -20,7 +19,7 @@ from .enums import (enum_for_field, sort_argument_for_object_type,
                     sort_enum_for_object_type)
 from .registry import Registry, get_global_registry
 from .resolvers import get_attr_resolver, get_custom_resolver
-from .utils import get_query, is_mapped_class, is_mapped_instance
+from .utils import get_query, is_orm_class, is_orm_instance
 
 
 class ORMField(OrderedType):
@@ -115,12 +114,7 @@ def construct_fields(
         inspected_model.relationships.items()
     )
 
-    # Filter out excluded fields
-    auto_orm_field_names = []
-    for attr_name, attr in all_model_attrs.items():
-        if (only_fields and attr_name not in only_fields) or (attr_name in exclude_fields):
-            continue
-        auto_orm_field_names.append(attr_name)
+    auto_orm_field_names = select_fields(all_model_attrs, only_fields, exclude_fields)
 
     # Gather all the ORM fields defined on the type
     custom_orm_fields_items = [
@@ -205,7 +199,7 @@ class SQLAlchemyObjectType(ObjectType):
         _meta=None,
         **options
     ):
-        assert is_mapped_class(model), (
+        assert is_orm_class(model), (
             "You need to pass a valid SQLAlchemy Model in " '{}.Meta, received "{}".'
         ).format(cls.__name__, model)
 
@@ -216,9 +210,6 @@ class SQLAlchemyObjectType(ObjectType):
             "The attribute registry in {} needs to be an instance of "
             'Registry, received "{}".'
         ).format(cls.__name__, registry)
-
-        if only_fields and exclude_fields:
-            raise ValueError("The options 'only_fields' and 'exclude_fields' cannot be both set on the same type.")
 
         sqla_fields = yank_fields_from_attrs(
             construct_fields(
@@ -280,7 +271,7 @@ class SQLAlchemyObjectType(ObjectType):
     def is_type_of(cls, root, info):
         if isinstance(root, cls):
             return True
-        if not is_mapped_instance(root):
+        if not is_orm_instance(root):
             raise Exception(('Received incompatible instance "{}".').format(root))
         return isinstance(root, cls._meta.model)
 
@@ -291,15 +282,11 @@ class SQLAlchemyObjectType(ObjectType):
 
     @classmethod
     def get_node(cls, info, id):
-        try:
-            return cls.get_query(info).get(id)
-        except NoResultFound:
-            return None
+        return cls.get_query(info).get(id)
 
     def resolve_id(self, info):
         # graphene_type = info.parent_type.graphene_type
-        keys = self.__mapper__.primary_key_from_instance(self)
-        return tuple(keys) if len(keys) > 1 else keys[0]
+        return get_primary_key_from_instance(self)
 
     @classmethod
     def enum_for_field(cls, field_name):
@@ -308,3 +295,21 @@ class SQLAlchemyObjectType(ObjectType):
     sort_enum = classmethod(sort_enum_for_object_type)
 
     sort_argument = classmethod(sort_argument_for_object_type)
+
+
+def get_primary_key_from_instance(instance):
+    keys = instance.__mapper__.primary_key_from_instance(instance)
+    return tuple(keys) if len(keys) > 1 else keys[0]
+
+
+def select_fields(
+    fields: Iterable[str], only_fields: Container[str], exclude_fields: Container[str]
+) -> Iterable[str]:
+    if only_fields and exclude_fields:
+        raise ValueError(
+            "The options 'only_fields' and 'exclude_fields'"
+            " cannot be both set on the same type."
+        )
+    if only_fields:
+        return (f for f in fields if f in only_fields)
+    return (f for f in fields if f not in exclude_fields)

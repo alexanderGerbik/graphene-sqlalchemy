@@ -12,12 +12,12 @@ from .resolvers import get_attr_resolver, get_custom_resolver
 is_selectin_available = getattr(strategies, 'SelectInLoader', None)
 
 
-def get_column_doc(column):
+def reflect_description(column):
     return getattr(column, "doc", None)
 
 
-def is_column_nullable(column):
-    return bool(getattr(column, "nullable", True))
+def reflect_required(column):
+    return not getattr(column, "nullable", True)
 
 
 def convert_sqlalchemy_relationship(relationship_prop, obj_type, connection_field_factory, batching,
@@ -143,8 +143,8 @@ def convert_sqlalchemy_column(column_prop, registry, resolver, **field_kwargs):
     column = column_prop.columns[0]
     registry = registry or get_global_registry()
     field_kwargs.setdefault('type', conversion(getattr(column, "type", None), column, registry))
-    field_kwargs.setdefault('required', not is_column_nullable(column))
-    field_kwargs.setdefault('description', get_column_doc(column))
+    field_kwargs.setdefault('required', reflect_required(column))
+    field_kwargs.setdefault('description', reflect_description(column))
 
     return Field(
         resolver=resolver,

@@ -22,7 +22,7 @@ def get_query(model, context):
     return query
 
 
-def is_mapped_class(cls):
+def is_orm_class(cls):
     try:
         class_mapper(cls)
     except (ArgumentError, UnmappedClassError):
@@ -31,7 +31,7 @@ def is_mapped_class(cls):
         return True
 
 
-def is_mapped_instance(cls):
+def is_orm_instance(cls):
     try:
         object_mapper(cls)
     except (ArgumentError, UnmappedInstanceError):
