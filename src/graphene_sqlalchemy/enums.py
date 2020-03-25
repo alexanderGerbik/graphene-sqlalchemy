@@ -1,3 +1,5 @@
+from enum import EnumMeta
+
 from sqlalchemy.orm import ColumnProperty
 from sqlalchemy.types import Enum as SQLAlchemyEnumType
 
@@ -54,6 +56,18 @@ def enum_for_sa_enum(sa_enum, registry):
         enum = _convert_sa_to_graphene_enum(sa_enum)
         registry.register_enum(sa_enum, enum)
     return enum
+
+
+def enum_for_sa_utils_enum(type, column):
+    # TODO Make ChoiceType conversion consistent with other enums
+    name = "{}_{}".format(column.table.name, column.name).upper()
+    if isinstance(type.choices, EnumMeta):
+        # type.choices may be Enum/IntEnum, in ChoiceType both presented as EnumMeta
+        # do not use from_enum here because we can have more than one enum column in table
+        members = list((v.name, v.value) for v in type.choices)
+        return Enum(name, members)
+    else:
+        return Enum(name, type.choices)
 
 
 def enum_for_field(obj_type, field_name):

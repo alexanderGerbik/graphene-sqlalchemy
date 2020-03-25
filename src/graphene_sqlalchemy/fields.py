@@ -8,7 +8,7 @@ from graphene.relay.connection import PageInfo
 from graphql_relay.connection.arrayconnection import connection_from_list_slice
 
 from .batching import get_batch_resolver
-from .utils import get_query
+from .utils import get_query, EnumValue
 
 
 class UnsortedSQLAlchemyConnectionField(ConnectionField):
@@ -93,7 +93,7 @@ class SQLAlchemyConnectionField(UnsortedSQLAlchemyConnectionField):
     def get_query(cls, model, info, sort=None, **args):
         query = get_query(model, info.context)
         if sort is not None:
-            if isinstance(sort, str):
+            if isinstance(sort, EnumValue):
                 query = query.order_by(sort.value)
             else:
                 query = query.order_by(*(col.value for col in sort))
