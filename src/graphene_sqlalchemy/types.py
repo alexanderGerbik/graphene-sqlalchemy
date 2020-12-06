@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Container, Iterable
+from typing import Container, Iterable, Tuple, Any
 
 import sqlalchemy
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -104,37 +104,17 @@ def construct_fields(
     :param function|None connection_field_factory:
     :rtype: OrderedDict[str, graphene.Field]
     """
-    inspected_model = sqlalchemy.inspect(model)
-    # Gather all the relevant attributes from the SQLAlchemy model in order
-    all_model_attrs = OrderedDict(
-        inspected_model.column_attrs.items() +
-        inspected_model.composites.items() +
-        [(name, item) for name, item in inspected_model.all_orm_descriptors.items()
-            if isinstance(item, hybrid_property)] +
-        inspected_model.relationships.items()
+    all_model_attrs = reflect_attrs(model)
+
+    custom_orm_fields_items = (
+        (attr_name, attr)
+        for attr_name, attr in traverse_attrs(obj_type)
+        if isinstance(attr, ORMField)
     )
+    custom_orm_fields_items = sorted(custom_orm_fields_items, key=lambda item: item[1])
+    link_to_reflected_attrs(custom_orm_fields_items, all_model_attrs)
 
     auto_orm_field_names = select_fields(all_model_attrs, only_fields, exclude_fields)
-
-    # Gather all the ORM fields defined on the type
-    custom_orm_fields_items = [
-        (attn_name, attr)
-        for base in reversed(obj_type.__mro__)
-        for attn_name, attr in base.__dict__.items()
-        if isinstance(attr, ORMField)
-    ]
-    custom_orm_fields_items = sorted(custom_orm_fields_items, key=lambda item: item[1])
-
-    # Set the model_attr if not set
-    for orm_field_name, orm_field in custom_orm_fields_items:
-        attr_name = orm_field.kwargs.get('model_attr', orm_field_name)
-        if attr_name not in all_model_attrs:
-            raise ValueError((
-                "Cannot map ORMField to a model attribute.\n"
-                "Field: '{}.{}'"
-            ).format(obj_type.__name__, orm_field_name,))
-        orm_field.kwargs['model_attr'] = attr_name
-
     # Merge automatic fields with custom ORM fields
     orm_fields = OrderedDict(custom_orm_fields_items)
     for orm_field_name in auto_orm_field_names:
@@ -313,3 +293,35 @@ def select_fields(
     if only_fields:
         return (f for f in fields if f in only_fields)
     return (f for f in fields if f not in exclude_fields)
+
+
+def reflect_attrs(model):
+    inspected_model = sqlalchemy.inspect(model)
+    # Gather all the relevant attributes from the SQLAlchemy model in order
+    all_model_attrs = OrderedDict(
+        inspected_model.column_attrs.items() +
+        inspected_model.composites.items() +
+        [(name, item) for name, item in
+         inspected_model.all_orm_descriptors.items()
+         if isinstance(item, hybrid_property)] +
+        inspected_model.relationships.items()
+    )
+    return all_model_attrs
+
+
+def traverse_attrs(cls: type) -> Iterable[Tuple[str, Any]]:
+    for base in reversed(cls.__mro__):
+        for attr_name, attr in base.__dict__.items():
+            yield attr_name, attr
+
+
+def link_to_reflected_attrs(custom_orm_fields_items, all_model_attrs):
+    # Set the model_attr if not set
+    for orm_field_name, orm_field in custom_orm_fields_items:
+        attr_name = orm_field.kwargs.get('model_attr', orm_field_name)
+        if attr_name not in all_model_attrs:
+            raise ValueError((
+                                 "Cannot map ORMField to a model attribute.\n"
+                                 "Field: '{}'"
+                             ).format(orm_field_name))
+        orm_field.kwargs['model_attr'] = attr_name
